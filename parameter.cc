@@ -843,6 +843,8 @@ void TechnologyParameter::assign_tsv(const string & in_file)
 			}
 			if (!strncmp("-tsv_length", line, strlen("-tsv_length"))) 
 			{
+			  // VINN 
+			  tsv_length *= g_ip->num_die_3d;
 			  tsv_length = scan_input_double_tsv_type(line,"-tsv_length","F/um", g_ip->ic_proj_type, tsv_type, g_ip->print_detail_debug);
 			  continue;
 			}
@@ -867,7 +869,6 @@ void TechnologyParameter::assign_tsv(const string & in_file)
 			  continue;
 			}
 			
-			tsv_length *= g_ip->num_die_3d;
 			if(iter==0)
 			{
 				tsv_parasitic_resistance_fine = tsv_resistance(BULK_CU_RESISTIVITY, tsv_length, tsv_diameter, tsv_contact_resistance);
