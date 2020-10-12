@@ -1081,7 +1081,7 @@ InputParameter::display_ip()
       cout << "array type                    : " << "CAM" << endl;
   }
   cout << "Model as memory               : " << is_main_mem << endl;
-  cout << "Model as 3D memory       	 : " << is_3d_mem << endl;
+  cout << "Model as 3D memory            : " << is_3d_mem << endl;
   cout << "Access mode                   : " << access_mode << endl;
   cout << "Data array cell type          : " << data_arr_ram_cell_tech_type << endl;
   cout << "Data array peripheral type    : " << data_arr_peri_global_tech_type << endl;
@@ -1111,7 +1111,7 @@ InputParameter::display_ip()
   cout << "Wire inside mat               : " << wire_is_mat_type << endl;
   cout << "Wire outside mat              : " << wire_os_mat_type << endl;
   cout << "Interconnect projection       : " << ic_proj_type << endl;
-  cout << "Wire signaling               : " << force_wiretype << endl;
+  cout << "Wire signaling                : " << force_wiretype << endl;
   cout << "Print level                   : " << print_detail << endl;
   cout << "ECC overhead                  : " << add_ecc_b_ << endl;
   cout << "Page size                     : " << page_sz_bits << endl;
@@ -1126,7 +1126,7 @@ InputParameter::display_ip()
     cout << "Ndsam1                        : " << g_ip->ndsam1 << endl;
     cout << "Ndsam2                        : " << g_ip->ndsam2 << endl;
   }
-  cout << "Subarray Driver direction       : " << g_ip->cl_vertical << endl;
+  cout << "Subarray Driver direction     : " << g_ip->cl_vertical << endl;
 
  // CACTI-I/O
   cout << "iostate                       : " ;
@@ -1146,7 +1146,7 @@ InputParameter::display_ip()
 	  case(CHIP_KILL): cout << "CHIP_KILL" << endl; break;
 	  default: assert(false);
   } 
-  cout << "io_type                     : " ;
+  cout << "io_type                       : " ;
   switch(io_type)
   {
 	  case(DDR3): cout << "DDR3" << endl; break;
@@ -1156,7 +1156,7 @@ InputParameter::display_ip()
 	  case(Low_Swing_Diff): cout << "Low_Swing_Diff" << endl; break;
 	  default: assert(false);
   } 	
-  cout << "dram_dimm                      : " ;
+  cout << "dram_dimm                     : " ;
   switch(dram_dimm)
   {
 	  case(UDIMM): cout << "UDIMM" << endl; break;
