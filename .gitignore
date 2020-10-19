@@ -1,4 +1,5 @@
 cacti
 *.out
 obj_dbg/
+*.bp
 */*.out
