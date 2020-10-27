@@ -60,7 +60,9 @@ class Mat : public Component
     PredecBlkDrv * way_sel_drv1;
     PredecBlkDrv * dummy_way_sel_predec_blk_drv2;
 
+    
     Predec * r_predec;
+    Predec * r_predec2;
     Predec * b_mux_predec;
     Predec * sa_mux_lev_1_predec;
     Predec * sa_mux_lev_2_predec;
