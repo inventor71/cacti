@@ -234,6 +234,24 @@ Mat::Mat(const DynamicParameter & dyn_p)
             num_subarrays_per_mat,
             is_dram,
             false);
+    // EDITED
+    PredecBlk * r_predec_blk1_2 = new PredecBlk(
+            num_dec_signals,
+            row_dec,
+            C_wire_predec_blk_out,
+            R_wire_predec_blk_out,
+            num_subarrays_per_mat,
+            is_dram,
+            true);
+    PredecBlk * r_predec_blk2_2 = new PredecBlk(
+            num_dec_signals,
+            row_dec,
+            C_wire_predec_blk_out,
+            R_wire_predec_blk_out,
+            num_subarrays_per_mat,
+            is_dram,
+            false);
+
     PredecBlk * b_mux_predec_blk1 = new PredecBlk(deg_bl_muxing, bit_mux_dec, 0, 0, 1, is_dram, true);
     PredecBlk * b_mux_predec_blk2 = new PredecBlk(deg_bl_muxing, bit_mux_dec, 0, 0, 1, is_dram, false);
     PredecBlk * sa_mux_lev_1_predec_blk1 = new PredecBlk(dyn_p.deg_senseamp_muxing_non_associativity, sa_mux_lev_1_dec, 0, 0, 1, is_dram, true);
@@ -245,6 +263,9 @@ Mat::Mat(const DynamicParameter & dyn_p)
 
     PredecBlkDrv * r_predec_blk_drv1 = new PredecBlkDrv(0, r_predec_blk1, is_dram);
     PredecBlkDrv * r_predec_blk_drv2 = new PredecBlkDrv(0, r_predec_blk2, is_dram);
+    // EDITED
+    PredecBlkDrv * r_predec_blk_drv1_2 = new PredecBlkDrv(0, r_predec_blk1_2, is_dram);
+    PredecBlkDrv * r_predec_blk_drv2_2 = new PredecBlkDrv(0, r_predec_blk2_2, is_dram);
     PredecBlkDrv * b_mux_predec_blk_drv1 = new PredecBlkDrv(0, b_mux_predec_blk1, is_dram);
     PredecBlkDrv * b_mux_predec_blk_drv2 = new PredecBlkDrv(0, b_mux_predec_blk2, is_dram);
     PredecBlkDrv * sa_mux_lev_1_predec_blk_drv1 = new PredecBlkDrv(0, sa_mux_lev_1_predec_blk1, is_dram);
@@ -255,6 +276,8 @@ Mat::Mat(const DynamicParameter & dyn_p)
     dummy_way_sel_predec_blk_drv2 = new PredecBlkDrv(1, dummy_way_sel_predec_blk2, is_dram);
 
     r_predec            = new Predec(r_predec_blk_drv1, r_predec_blk_drv2);
+    // EDITED
+    r_predec2           = new Predec(r_predec_blk_drv1_2, r_predec_blk_drv2_2);
     b_mux_predec        = new Predec(b_mux_predec_blk_drv1, b_mux_predec_blk_drv2);
     sa_mux_lev_1_predec = new Predec(sa_mux_lev_1_predec_blk_drv1, sa_mux_lev_1_predec_blk_drv2);
     sa_mux_lev_2_predec = new Predec(sa_mux_lev_2_predec_blk_drv1, sa_mux_lev_2_predec_blk_drv2);
@@ -364,6 +387,9 @@ Mat::Mat(const DynamicParameter & dyn_p)
 
     int branch_effort_predec_blk1_out = (1 << r_predec_blk2->number_input_addr_bits);
     int branch_effort_predec_blk2_out = (1 << r_predec_blk1->number_input_addr_bits);
+    // EDITED
+    int branch_effort_predec_blk1_out = (1 << r_predec_blk2_2->number_input_addr_bits);
+    int branch_effort_predec_blk2_out = (1 << r_predec_blk1_2->number_input_addr_bits);
     w_row_predecode_output_wires   = (branch_effort_predec_blk1_out + branch_effort_predec_blk2_out) *
         g_tp.wire_inside_mat.pitch * (RWP + ERP + EWP);
 
@@ -413,19 +439,27 @@ Mat::Mat(const DynamicParameter & dyn_p)
 
     // double area_rectangle_center_mat = h_non_cell_area * w_non_cell_area;
     double area_mat_center_circuitry = (r_predec_blk_drv1->area.get_area() +
+            // EDITED
+            r_predec_blk_drv1_2->area.get_area() +
             b_mux_predec_blk_drv1->area.get_area() +
             sa_mux_lev_1_predec_blk_drv1->area.get_area() +
             sa_mux_lev_2_predec_blk_drv1->area.get_area() +
             way_sel_drv1->area.get_area() +
             r_predec_blk_drv2->area.get_area() +
+            // EDITED
+            r_predec_blk_drv2_2->area.get_area() +
             b_mux_predec_blk_drv2->area.get_area() +
             sa_mux_lev_1_predec_blk_drv2->area.get_area() +
             sa_mux_lev_2_predec_blk_drv2->area.get_area() +
             r_predec_blk1->area.get_area() +
+            // EDITED
+            r_predec_blk1_2->area.get_area() +
             b_mux_predec_blk1->area.get_area() +
             sa_mux_lev_1_predec_blk1->area.get_area() +
             sa_mux_lev_2_predec_blk1->area.get_area() +
             r_predec_blk2->area.get_area() +
+            // EDITED
+            r_predec_blk2_2->area.get_area() +
             b_mux_predec_blk2->area.get_area() +
             sa_mux_lev_1_predec_blk2->area.get_area() +
             sa_mux_lev_2_predec_blk2->area.get_area() +
@@ -496,6 +530,9 @@ Mat::~Mat()
 
     delete r_predec->blk1;
     delete r_predec->blk2;
+    // EDITED
+    delete r_predec2->blk1;
+    delete r_predec2->blk2;
     delete b_mux_predec->blk1;
     delete b_mux_predec->blk2;
     delete sa_mux_lev_1_predec->blk1;
@@ -507,6 +544,9 @@ Mat::~Mat()
 
     delete r_predec->drv1;
     delete r_predec->drv2;
+    // EDITED
+    delete r_predec2->drv1;
+    delete r_predec2->drv2;
     delete b_mux_predec->drv1;
     delete b_mux_predec->drv2;
     delete sa_mux_lev_1_predec->drv1;
@@ -517,6 +557,8 @@ Mat::~Mat()
     delete dummy_way_sel_predec_blk_drv2;
 
     delete r_predec;
+    // EDITED
+    delete r_predec2;
     delete b_mux_predec;
     delete sa_mux_lev_1_predec;
     delete sa_mux_lev_2_predec;
@@ -581,6 +623,7 @@ double Mat::compute_delays(double inrisetime)
 
 
         //TODO: this is just for compute plain read/write energy for fa and cam, plain read/write access timing need to be revisited.
+        // EDITED: TODO
         outrisetime = r_predec->compute_delays(inrisetime);
         row_dec_outrisetime = row_dec->compute_delays(outrisetime);
 
@@ -633,6 +676,7 @@ double Mat::compute_delays(double inrisetime)
 
 
 
+    // EDITED: TODO
     outrisetime = r_predec->compute_delays(inrisetime);
     row_dec_outrisetime = row_dec->compute_delays(outrisetime);
 
@@ -666,6 +710,7 @@ double Mat::compute_delays(double inrisetime)
 
     if (row_dec->exist == false)
     {
+        // EDITED: TODO
         delay_wl_reset = MAX(r_predec->blk1->delay, r_predec->blk2->delay);
     }
     return outrisetime;
@@ -1518,6 +1563,8 @@ void Mat::compute_power_energy()
     else
     { //!is_3d_mem: TODO (VINN): revisit later
         power.readOp.dynamic += r_predec->power.readOp.dynamic +
+            // EDITED
+            r_predec2->power.readOp.dynamic +
             b_mux_predec->power.readOp.dynamic +
             sa_mux_lev_1_predec->power.readOp.dynamic +
             sa_mux_lev_2_predec->power.readOp.dynamic;
@@ -1718,6 +1765,8 @@ void Mat::compute_power_energy()
 
         if (!g_ip->wl_power_gated)
             power.readOp.leakage += r_predec->power.readOp.leakage +
+                // EDITED
+                r_predec2->power.readOp.leakage +
                 b_mux_predec->power.readOp.leakage +
                 sa_mux_lev_1_predec->power.readOp.leakage +
                 sa_mux_lev_2_predec->power.readOp.leakage +
@@ -1727,6 +1776,8 @@ void Mat::compute_power_energy()
                 power_sa_mux_lev_2_decoders.readOp.leakage;
         else
             power.readOp.leakage += (r_predec->power.readOp.leakage +
+                    // EDITED
+                    r_predec2->power.readOp.leakage +
                     b_mux_predec->power.readOp.leakage +
                     sa_mux_lev_1_predec->power.readOp.leakage +
                     sa_mux_lev_2_predec->power.readOp.leakage +
@@ -1736,6 +1787,8 @@ void Mat::compute_power_energy()
                     power_sa_mux_lev_2_decoders.readOp.leakage)/g_tp.peri_global.Vdd*g_tp.peri_global.Vcc_min;
 
         wl_leakage = r_predec->power.readOp.leakage +
+            // EDITED
+            r_predec2->power.readOp.leakage +
             b_mux_predec->power.readOp.leakage +
             sa_mux_lev_1_predec->power.readOp.leakage +
             sa_mux_lev_2_predec->power.readOp.leakage +
@@ -1786,6 +1839,8 @@ void Mat::compute_power_energy()
         power_sa_mux_lev_2_decoders.readOp.gate_leakage = sa_mux_lev_2_dec->power.readOp.gate_leakage * dp.Ndsam_lev_2;
 
         power.readOp.gate_leakage += r_predec->power.readOp.gate_leakage +
+            //EDITED
+            r_predec2->power.readOp.gate_leakage +
             b_mux_predec->power.readOp.gate_leakage +
             sa_mux_lev_1_predec->power.readOp.gate_leakage +
             sa_mux_lev_2_predec->power.readOp.gate_leakage +
@@ -1821,6 +1876,8 @@ void Mat::compute_power_energy()
         // leakage power
         power_row_decoders.readOp.leakage = row_dec->power.readOp.leakage * subarray.num_rows * num_subarrays_per_mat;
         power.readOp.leakage += r_predec->power.readOp.leakage +
+            // EDITED
+            r_predec2->power.readOp.leakage +
             power_row_decoders.readOp.leakage;
 
         //cout<<"leakage5"<<power.readOp.leakage<<endl;
@@ -1860,6 +1917,8 @@ void Mat::compute_power_energy()
         // gate_leakage power
         power_row_decoders.readOp.gate_leakage = row_dec->power.readOp.gate_leakage * subarray.num_rows * num_subarrays_per_mat;
         power.readOp.gate_leakage += r_predec->power.readOp.gate_leakage +
+            // EDITED
+            r_predec2->power.readOp.gate_leakage +
             power_row_decoders.readOp.gate_leakage;
 
         //cout<<"leakage5"<<power.readOp.gate_leakage<<endl;
@@ -1897,6 +1956,8 @@ void Mat::compute_power_energy()
         // leakage power
         power_row_decoders.readOp.leakage = row_dec->power.readOp.leakage * subarray.num_rows * num_subarrays_per_mat*(RWP + ERP + EWP);
         power.readOp.leakage += r_predec->power.readOp.leakage +
+            // EDITED
+            r_predec2->power.readOp.leakage +
             power_row_decoders.readOp.leakage;
 
         //inside cam
@@ -1926,6 +1987,8 @@ void Mat::compute_power_energy()
         // gate_leakage power
         power_row_decoders.readOp.gate_leakage = row_dec->power.readOp.gate_leakage * subarray.num_rows * num_subarrays_per_mat*(RWP + ERP + EWP);
         power.readOp.gate_leakage += r_predec->power.readOp.gate_leakage +
+            // EDITED
+            r_predec2->power.readOp. gate_leakage +
             power_row_decoders.readOp.gate_leakage;
 
         //inside cam
