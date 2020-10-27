@@ -154,9 +154,11 @@ Mat::Mat(const DynamicParameter & dyn_p)
         R_wire_sa_mux_dec_out  /= 2.0;
     }
 
+    num_addr_lines = 2;
 
     row_dec = new Decoder(
             num_dec_signals,
+            num_addr_lines,
             false,
             subarray.C_wl,
             R_wire_wl_drv_out,
@@ -172,6 +174,7 @@ Mat::Mat(const DynamicParameter & dyn_p)
     //  }
     bit_mux_dec = new Decoder(
             deg_bl_muxing,// This number is 1 for FA or CAM
+            1,
             false,
             C_ld_bit_mux_dec_out,
             R_wire_bit_mux_dec_out,
@@ -181,6 +184,7 @@ Mat::Mat(const DynamicParameter & dyn_p)
             camFlag? cam_cell:cell);
     sa_mux_lev_1_dec = new Decoder(
             dp.deg_senseamp_muxing_non_associativity, // This number is 1 for FA or CAM
+            1,
             dp.number_way_select_signals_mat ? true : false,//only sa_mux_lev_1_dec needs way select signal
             C_ld_sa_mux_lev_1_dec_out,
             R_wire_sa_mux_dec_out,
@@ -190,6 +194,7 @@ Mat::Mat(const DynamicParameter & dyn_p)
             camFlag? cam_cell:cell);
     sa_mux_lev_2_dec = new Decoder(
             dp.Ndsam_lev_2, // This number is 1 for FA or CAM
+            1,
             false,
             C_ld_sa_mux_lev_2_dec_out,
             R_wire_sa_mux_dec_out,
