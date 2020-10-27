@@ -242,6 +242,7 @@ double Decoder::compute_delays(double inrisetime)
     }
 
     // first check whether a decoder is required at all
+    // (VINN) row decode gate drives the first inverter in inverter chain.
     rd = tr_R_on(w_dec_n[0], NCH, num_in_signals, is_dram, false, is_wl_tr);
     c_load = gate_C(w_dec_n[1] + w_dec_p[1], 0.0, is_dram, false, is_wl_tr);
     c_intrinsic = drain_C_(w_dec_p[0], PCH, 1, 1, area.h, is_dram, false, is_wl_tr) * num_in_signals +
@@ -250,6 +251,7 @@ double Decoder::compute_delays(double inrisetime)
     this_delay = horowitz(inrisetime, tf, 0.5, 0.5, RISE);
     delay += this_delay;
     inrisetime = this_delay / (1.0 - 0.5);
+    // 
     power.readOp.dynamic += (c_load + c_intrinsic) * Vdd * Vdd;
 
     for (i = 1; i < num_gates - 1; ++i)
