@@ -43,6 +43,7 @@ using namespace std;
 
 Decoder::Decoder(
     int    _num_dec_signals,
+    int    _num_addr_lines,
     bool   flag_way_select,
     double _C_ld_dec_out,
     double _R_wire_dec_out,
@@ -51,6 +52,7 @@ Decoder::Decoder(
     bool   is_wl_tr_,
     const  Area & cell_)
 :exist(false),
+  num_addr_lines(_num_addr_lines),
   C_ld_dec_out(_C_ld_dec_out),
   R_wire_dec_out(_R_wire_dec_out),
   num_gates(0), num_gates_min(2),
@@ -135,23 +137,41 @@ void Decoder::compute_widths()
     {
       w_dec_n[0] = 3 * g_tp.min_w_nmos_;
       w_dec_p[0] = p_to_n_sz_ratio * g_tp.min_w_nmos_;
-      F = gnand3;
+      F = gnand3; // logical_effort (G)
     }
 
     F *= C_ld_dec_out / (gate_C(w_dec_n[0], 0, is_dram, false, is_wl_tr) +
-                         gate_C(w_dec_p[0], 0, is_dram, false, is_wl_tr));
-    num_gates = logical_effort(
-        num_gates_min,
-        num_in_signals == 2 ? gnand2 : gnand3,
-        F,
-        w_dec_n,
-        w_dec_p,
-        C_ld_dec_out,
-        p_to_n_sz_ratio,
-        is_dram,
-        is_wl_tr,
-        g_tp.max_w_nmos_dec);
+                         gate_C(w_dec_p[0], 0, is_dram, false, is_wl_tr)); // F(path effor) = EF * G
 
+    if (num_addr_lines == 1) 
+    {
+        num_gates = logical_effort(
+            num_gates_min,
+            num_in_signals == 2 ? gnand2 : gnand3,
+            F,
+            w_dec_n,
+            w_dec_p,
+            C_ld_dec_out,
+            p_to_n_sz_ratio,
+            is_dram,
+            is_wl_tr,
+            g_tp.max_w_nmos_dec);
+    }
+    else
+    {
+        num_gates = logical_effort_with_nor_header(
+            num_gates_min,
+            num_addr_lines,
+            num_in_signals == 2 ? gnand2 : gnand3,
+            F,
+            w_dec_n,
+            w_dec_p,
+            C_ld_dec_out,
+            p_to_n_sz_ratio,
+            is_dram,
+            is_wl_tr,
+            g_tp.max_w_nmos_dec);
+    }
   }
 }
 
@@ -180,6 +200,12 @@ void Decoder::compute_area()
 
     for (int i = 1; i < num_gates; i++)
     {
+      if (num_addr_lines > 1 && i == 1)
+      {
+          cumulative_area += compute_gate_area(NOR, num_addr_lines, w_dec_p[i], w_dec_n[i], area.h);
+          cumulative_curr += cmos_Isub_leakage(w_dec_n[i], w_dec_p[i], num_addr_lines, nor, is_dram);
+          cumulative_curr_Ig = cmos_Ig_leakage(w_dec_n[i], w_dec_p[i], num_addr_lines, nor, is_dram);
+      }
       cumulative_area += compute_gate_area(INV, 1, w_dec_p[i], w_dec_n[i], area.h);
       cumulative_curr += cmos_Isub_leakage(w_dec_n[i], w_dec_p[i], 1, inv, is_dram);
       cumulative_curr_Ig = cmos_Ig_leakage(w_dec_n[i], w_dec_p[i], 1, inv, is_dram);
@@ -242,7 +268,8 @@ double Decoder::compute_delays(double inrisetime)
     }
 
     // first check whether a decoder is required at all
-    // (VINN) row decode gate drives the first inverter in inverter chain.
+    // MULTI: row decode gate will consist of two gates. (a nand gate and a nor gate)
+    // the nand row decode gate drives the nor gate of #(num_addr_lines) inputs
     rd = tr_R_on(w_dec_n[0], NCH, num_in_signals, is_dram, false, is_wl_tr);
     c_load = gate_C(w_dec_n[1] + w_dec_p[1], 0.0, is_dram, false, is_wl_tr);
     c_intrinsic = drain_C_(w_dec_p[0], PCH, 1, 1, area.h, is_dram, false, is_wl_tr) * num_in_signals +
@@ -251,10 +278,21 @@ double Decoder::compute_delays(double inrisetime)
     this_delay = horowitz(inrisetime, tf, 0.5, 0.5, RISE);
     delay += this_delay;
     inrisetime = this_delay / (1.0 - 0.5);
-    // 
+    power.readOp.dynamic += (c_load + c_intrinsic) * Vdd * Vdd * num_addr_lines;
+
+    // MULTI: the nor row decode gate drives the first inverter in the chain.
+    // if num_addr_lines is 1, this behaves as an inverter
+    rd = tr_R_on(w_dec_n[1], NCH, num_addr_lines, is_dram, false, is_wl_tr);
+    c_load = gate_C(w_dec_n[2] + w_dec_p[2], 0.0, is_dram, false, is_wl_tr);
+    c_intrinsic = drain_C_(w_dec_p[1], PCH, num_addr_lines, 1, area.h, is_dram, false, is_wl_tr) +
+                  drain_C_(w_dec_n[1], NCH, 1, 1, area.h, is_dram, false, is_wl_tr) * num_addr_lines;
+    tf = rd * (c_intrinsic + c_load);
+    this_delay = horowitz(inrisetime, tf, 0.5, 0.5, RISE);
+    delay += this_delay;
+    inrisetime = this_delay / (1.0 - 0.5);
     power.readOp.dynamic += (c_load + c_intrinsic) * Vdd * Vdd;
 
-    for (i = 1; i < num_gates - 1; ++i)
+    for (i = 2; i < num_gates - 1; ++i)
     {
       rd = tr_R_on(w_dec_n[i], NCH, 1, is_dram, false, is_wl_tr);
       c_load = gate_C(w_dec_p[i+1] + w_dec_n[i+1], 0.0, is_dram, false, is_wl_tr);

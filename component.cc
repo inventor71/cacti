@@ -235,3 +235,61 @@ int Component::logical_effort(
   return num_gates;
 }
 
+
+int Component::logical_effort_with_nor_header(
+    int num_gates_min,
+    int num_addr_lines,
+    double g,
+    double F,
+    double * w_n,
+    double * w_p,
+    double C_load,
+    double p_to_n_sz_ratio,
+    bool   is_dram_,
+    bool   is_wl_tr_,
+    double max_w_nmos)
+{
+  int num_gates = (int) (log(F) / log(fopt));
+
+  // the first gate is nor. so check if num_gates is even. if so, add 1 to make it odd
+  num_gates+= (num_gates % 2) ? 0 : 1;
+  num_gates = MAX(num_gates, num_gates_min);
+  assert(num_gates >= 4);
+
+  // recalculate the effective fanout of each stage
+  double f = pow(F, 1.0 / num_gates);
+  int    i = num_gates - 1;
+  double C_in = C_load / f;
+  w_n[i]  = (1.0 / (1.0 + p_to_n_sz_ratio)) * C_in / gate_C(1, 0, is_dram_, false, is_wl_tr_);
+  w_n[i]  = MAX(w_n[i], g_tp.min_w_nmos_);
+  w_p[i]  = p_to_n_sz_ratio * w_n[i];
+
+  if (w_n[i] > max_w_nmos) // && !g_ip->is_3d_mem)
+  {
+    double C_ld = gate_C((1 + p_to_n_sz_ratio) * max_w_nmos, 0, is_dram_, false, is_wl_tr_);
+    F = g * C_ld / gate_C(w_n[0] + w_p[0], 0, is_dram_, false, is_wl_tr_);
+    num_gates = (int) (log(F) / log(fopt)) + 1;
+    num_gates+= (num_gates % 2) ? 1 : 0;
+    num_gates = MAX(num_gates, num_gates_min);
+    f = pow(F, 1.0 / (num_gates - 1));
+    i = num_gates - 1;
+    w_n[i]  = max_w_nmos;
+    w_p[i]  = p_to_n_sz_ratio * w_n[i];
+  }
+
+  for (i = num_gates - 2; i >= 1; i--)
+  {
+    w_n[i] = MAX(w_n[i+1] / f, g_tp.min_w_nmos_);
+    w_p[i] = p_to_n_sz_ratio * w_n[i];
+    if (i == 1) // sizing the or gate.
+    {
+        w_n[i] = MAX((3/2*num_addr_lines + 1) * w_n[i+1] / f, g_tp.min_w_nmos_);
+        w_p[i] = p_to_n_sz_ratio * w_n[i];
+
+    }
+  }
+
+  assert(num_gates <= MAX_NUMBER_GATES_STAGE);
+  return num_gates;
+}
+
