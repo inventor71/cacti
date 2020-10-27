@@ -200,7 +200,7 @@ void Decoder::compute_area()
 
     for (int i = 1; i < num_gates; i++)
     {
-      if (num_addr_lines != 2 && i == 1)
+      if (num_addr_lines > 1 && i == 1)
       {
           cumulative_area += compute_gate_area(NOR, num_addr_lines, w_dec_p[i], w_dec_n[i], area.h);
           cumulative_curr += cmos_Isub_leakage(w_dec_n[i], w_dec_p[i], num_addr_lines, nor, is_dram);
@@ -281,6 +281,7 @@ double Decoder::compute_delays(double inrisetime)
     power.readOp.dynamic += (c_load + c_intrinsic) * Vdd * Vdd * num_addr_lines;
 
     // MULTI: the nor row decode gate drives the first inverter in the chain.
+    // if num_addr_lines is 1, this behaves as an inverter
     rd = tr_R_on(w_dec_n[1], NCH, num_addr_lines, is_dram, false, is_wl_tr);
     c_load = gate_C(w_dec_n[2] + w_dec_p[2], 0.0, is_dram, false, is_wl_tr);
     c_intrinsic = drain_C_(w_dec_p[1], PCH, num_addr_lines, 1, area.h, is_dram, false, is_wl_tr) +
