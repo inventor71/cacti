@@ -635,6 +635,7 @@ double Mat::compute_delays(double inrisetime)
         //TODO: this is just for compute plain read/write energy for fa and cam, plain read/write access timing need to be revisited.
         // EDITED: TODO
         outrisetime = r_predec->compute_delays(inrisetime);
+        outrisetime = r_predec2->compute_delays(inrisetime);
         row_dec_outrisetime = row_dec->compute_delays(outrisetime);
 
         outrisetime = b_mux_predec->compute_delays(inrisetime);
@@ -688,6 +689,7 @@ double Mat::compute_delays(double inrisetime)
 
     // EDITED: TODO
     outrisetime = r_predec->compute_delays(inrisetime);
+    outrisetime = r_predec2->compute_delays(inrisetime);
     row_dec_outrisetime = row_dec->compute_delays(outrisetime);
 
     outrisetime = b_mux_predec->compute_delays(inrisetime);
