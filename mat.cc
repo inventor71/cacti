@@ -351,7 +351,8 @@ Mat::Mat(const DynamicParameter & dyn_p)
     h_subarray_out_drv *= (RWP + ERP + SCHP);
 
     double h_comparators                = 0.0;
-    double w_row_predecode_output_wires = 0.0;
+    double w_row_predecode_output_wires_1 = 0.0;
+    double w_row_predecode_output_wires_2 = 0.0;
     double h_bit_mux_dec_out_wires      = 0.0;
     double h_senseamp_mux_dec_out_wires = 0.0;
 
@@ -393,9 +394,11 @@ Mat::Mat(const DynamicParameter & dyn_p)
     int branch_effort_predec_blk1_out = (1 << r_predec_blk2->number_input_addr_bits);
     int branch_effort_predec_blk2_out = (1 << r_predec_blk1->number_input_addr_bits);
     // EDITED
-    int branch_effort_predec_blk1_out = (1 << r_predec_blk2_2->number_input_addr_bits);
-    int branch_effort_predec_blk2_out = (1 << r_predec_blk1_2->number_input_addr_bits);
-    w_row_predecode_output_wires   = (branch_effort_predec_blk1_out + branch_effort_predec_blk2_out) *
+    int branch_effort_predec_blk1_2_out = (1 << r_predec_blk2_2->number_input_addr_bits);
+    int branch_effort_predec_blk2_2_out = (1 << r_predec_blk1_2->number_input_addr_bits);
+    w_row_predecode_output_wires_1   = (branch_effort_predec_blk1_out + branch_effort_predec_blk2_out) *
+        g_tp.wire_inside_mat.pitch * (RWP + ERP + EWP);
+    w_row_predecode_output_wires_2   = (branch_effort_predec_blk1_2_out + branch_effort_predec_blk2_2_out) *
         g_tp.wire_inside_mat.pitch * (RWP + ERP + EWP);
 
 
@@ -403,7 +406,8 @@ Mat::Mat(const DynamicParameter & dyn_p)
         (h_bit_mux_sense_amp_precharge_sa_mux_write_driver_write_mux +
          h_subarray_out_drv + h_comparators);
 
-    double w_non_cell_area = MAX(w_row_predecode_output_wires, num_subarrays_per_row * w_row_decoder);
+    double w_non_cell_area_1 = MAX(w_row_predecode_output_wires_1, num_subarrays_per_row * w_row_decoder);
+    double w_non_cell_area_2 = MAX(w_row_predecode_output_wires_2, num_subarrays_per_row * w_row_decoder);
 
     if (deg_bl_muxing > 1)
     {
@@ -479,7 +483,7 @@ Mat::Mat(const DynamicParameter & dyn_p)
     //  {
     assert(num_subarrays_per_mat/num_subarrays_per_row>0);
     area.h = (num_subarrays_per_mat/num_subarrays_per_row)* subarray.area.h + h_non_cell_area;
-    area.w = num_subarrays_per_row * subarray.area.get_w() + w_non_cell_area;
+    area.w = num_subarrays_per_row * subarray.area.get_w() + w_non_cell_area_1 + w_non_cell_area_2;
     area.w = (area.h*area.w + area_mat_center_circuitry) / area.h;
     /// = subarray.area.get_area() * num_subarrays_per_mat * 100.0 / area.get_area();
 
@@ -508,7 +512,8 @@ Mat::Mat(const DynamicParameter & dyn_p)
     {
         cout<<"h_non_cell_area"<<h_non_cell_area<<endl;
         cout<<"area.h =" << (num_subarrays_per_mat/num_subarrays_per_row)* subarray.area.h<<endl;
-        cout<<"w_non_cell_area"<<w_non_cell_area<<endl;
+        cout<<"w_non_cell_area_1"<<w_non_cell_area_1<<endl;
+        cout<<"w_non_cell_area_2"<<w_non_cell_area_2<<endl;
         cout<<"area_mat_center_circuitry"<<area_mat_center_circuitry<<endl;
     }
 
