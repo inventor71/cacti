@@ -154,7 +154,7 @@ Mat::Mat(const DynamicParameter & dyn_p)
         R_wire_sa_mux_dec_out  /= 2.0;
     }
 
-    num_addr_lines = 2;
+    int num_addr_lines = 2;
 
     row_dec = new Decoder(
             num_dec_signals,

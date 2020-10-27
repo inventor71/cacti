@@ -76,6 +76,19 @@ class Component
         bool   is_wl_tr_,
         double max_w_nmos);
 
+    int logical_effort_with_nor_header(
+        int    num_gates_min,
+        int    num_addr_lines,
+        double g,
+        double F,
+        double * w_n,
+        double * w_p,
+        double C_load,
+        double p_to_n_sz_ratio,
+        bool   is_dram_,
+        bool   is_wl_tr_,
+        double max_w_nmos);
+
   private:
     double compute_diffusion_width(int num_stacked_in, int num_folded_tr);
 };

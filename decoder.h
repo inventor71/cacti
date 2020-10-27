@@ -47,6 +47,7 @@ class Decoder : public Component
   public:
     Decoder(
         int _num_dec_signals,
+        int _num_addr_lines,
         bool flag_way_select,
         double _C_ld_dec_out,
         double _R_wire_dec_out,
@@ -57,6 +58,7 @@ class Decoder : public Component
 
     bool   exist;
     int    num_in_signals;
+    int    num_addr_lines;
     double C_ld_dec_out;
     double R_wire_dec_out;
     int    num_gates;

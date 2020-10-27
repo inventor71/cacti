@@ -110,7 +110,8 @@ double Subarray::get_total_cell_area()
 //		  : cam_cell.get_area()*(num_rows+1)*(num_cols_fa_cam + num_cols_fa_ram));
 //		  //: cam_cell.get_area()*(num_rows+1)*num_cols_fa_cam + sram_cell.get_area()*(num_rows+1)*num_cols_fa_ram);//for FA, this area does not include the dummy cells in SRAM arrays.
 
-    if (!(is_fa || dp.pure_cam))
+    //if (!(is_fa || dp.pure_cam))
+    if (1) // (VINN) dp.pure_cam addressing issue
 	  return (cell.get_area() * num_rows * num_cols);
     else if (is_fa)
     { //for FA, this area includes the dummy cells in SRAM arrays.
